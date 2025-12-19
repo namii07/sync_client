@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/authService";
+import { checkNetworkStatus } from "../../utils/networkChecker";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import "./auth.css";
@@ -39,6 +40,19 @@ const SignUp = () => {
       navigate("/");
     } catch (err) {
       console.error('Registration error:', err);
+      
+      // Check network status
+      const networkStatus = await checkNetworkStatus();
+      
+      if (!networkStatus.internet) {
+        toast.error("No internet connection. Please check your network.");
+        setLoading(false);
+        return;
+      }
+      
+      if (!networkStatus.backend) {
+        toast.loading("Backend is starting up (Render free tier)...", { duration: 3000 });
+      }
       
       // Fallback: Create mock user when backend is unavailable
       const mockUser = {
