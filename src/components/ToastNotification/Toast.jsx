@@ -1,4 +1,4 @@
-import "./toast.css";
+import "./Toast.css";
 
 const Toast = ({ message }) => (
   <div
