@@ -1,0 +1,49 @@
+.explore-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 1.5rem;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 20px;
+  border: none;
+  background: #f4f4fb;
+  margin-bottom: 1.5rem;
+}
+
+.user-grid,
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.user-card {
+  background: #fff0f6;
+  padding: 1rem;
+  border-radius: 16px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+}
+
+.user-card img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.post-grid img {
+  width: 100%;
+  border-radius: 16px;
+  transition: transform 0.3s;
+}
+
+.post-grid img:hover {
+  transform: scale(1.05);
+}

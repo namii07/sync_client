@@ -1,0 +1,28 @@
+.admin-container {
+  max-width: 700px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.admin-card {
+  background: #e0f2fe;
+  padding: 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+}
+
+.admin-user {
+  display: flex;
+  justify-content: space-between;
+  background: #fff7ed;
+  padding: 0.8rem;
+  border-radius: 14px;
+  margin-bottom: 0.5rem;
+}
+
+.admin-user button {
+  background: #fda4af;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 14px;
+}

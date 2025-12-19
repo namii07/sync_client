@@ -1,0 +1,21 @@
+.feed-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 1rem;
+}
+
+.empty-feed {
+  text-align: center;
+  color: var(--pastel-muted);
+  margin-top: 3rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0 }
+  to { transform: translateY(0); opacity: 1 }
+}

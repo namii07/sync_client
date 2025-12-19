@@ -1,0 +1,52 @@
+/* Home.css */
+
+/* Feed container styling */
+.feed-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Empty feed styling */
+.empty-feed {
+  text-align: center;
+  padding: 50px 20px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  color: #555;
+  font-family: 'Arial', sans-serif;
+}
+
+/* CreatePost spacing */
+.feed-container > .create-post-container {
+  margin-bottom: 20px;
+}
+
+/* Loader centering */
+.feed-container > .loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 0;
+}
+
+/* Optional: Post spacing */
+.feed-container > .post-card {
+  margin-bottom: 15px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .feed-container {
+    width: 95%;
+  }
+
+  .empty-feed {
+    padding: 30px 10px;
+    font-size: 14px;
+  }
+}

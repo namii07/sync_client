@@ -18,3 +18,16 @@ a {
 button {
   cursor: pointer;
 }
+
+:root {
+  --pastel-bg: #f7f7fb;
+  --pastel-card: #ffffff;
+  --pastel-primary: #7c7cff;
+  --pastel-secondary: #ffb4c6;
+  --pastel-text: #2d2d2d;
+  --pastel-muted: #9ca3af;
+}
+
+body {
+  background: var(--pastel-bg);
+}
