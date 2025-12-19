@@ -1,21 +1,47 @@
 .feed-container {
   max-width: 600px;
-  margin: auto;
-  padding: 1rem;
+  margin: 0 auto;
+  padding: 20px;
+  background: #000;
+  min-height: 100vh;
 }
 
-.empty-feed {
+.feed-header {
   text-align: center;
-  color: var(--pastel-muted);
-  margin-top: 3rem;
+  margin-bottom: 30px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+.feed-header h1 {
+  color: white;
+  font-size: 28px;
+  margin: 0;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0 }
-  to { transform: translateY(0); opacity: 1 }
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.no-posts {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+  font-size: 18px;
+}
+
+/* Remove any background images */
+body {
+  background: #000 !important;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Profile card clean background */
+.profile-card {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
 }

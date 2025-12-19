@@ -1,23 +1,46 @@
 import { useEffect, useState } from "react";
+import { postService } from "../../services/postService";
+import { useAuth } from "../../context/AuthContext";
+import { formatDistanceToNow } from "../../utils/formatDate";
 import Toast from "../ToastNotification/Toast";
+import toast from "react-hot-toast";
 import "./commentSection.css";
 
 const CommentSection = ({ postId }) => {
+  const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
-  const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setComments([
-      { id: 1, user: "alice", text: "Beautiful UI 💜" },
-      { id: 2, user: "john", text: "Love this!" },
-    ]);
+    const fetchComments = async () => {
+      try {
+        const data = await postService.getComments(postId);
+        setComments(data.comments || []);
+      } catch (error) {
+        console.error('Failed to load comments:', error);
+      }
+    };
+
+    if (postId) {
+      fetchComments();
+    }
   }, [postId]);
 
-  const addComment = () => {
-    setComments([{ id: Date.now(), user: "you", text }, ...comments]);
-    setText("");
-    setToast("Comment added!");
+  const addComment = async () => {
+    if (!text.trim()) return;
+    
+    setLoading(true);
+    try {
+      const newComment = await postService.addComment(postId, { text: text.trim() });
+      setComments(prev => [newComment, ...prev]);
+      setText("");
+      toast.success("Comment added!");
+    } catch (error) {
+      toast.error('Failed to add comment');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,12 +53,21 @@ const CommentSection = ({ postId }) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <button onClick={addComment}>Post</button>
+        <button onClick={addComment} disabled={loading || !text.trim()}>
+          {loading ? 'Posting...' : 'Post'}
+        </button>
       </div>
 
-      {comments.map((c) => (
-        <div className="comment" key={c.id}>
-          <b>@{c.user}</b> {c.text}
+      {comments.map((comment) => (
+        <div className="comment" key={comment._id}>
+          <img src={comment.user?.avatar} alt={comment.user?.username} className="comment-avatar" />
+          <div className="comment-content">
+            <div className="comment-header">
+              <b>@{comment.user?.username}</b>
+              <span className="comment-time">{formatDistanceToNow(comment.timestamp)}</span>
+            </div>
+            <p>{comment.text}</p>
+          </div>
         </div>
       ))}
     </div>

@@ -1,36 +1,121 @@
-.notification-page {
+.notifications-page {
+  padding: 20px;
   max-width: 600px;
-  margin: auto;
-  padding: 1.5rem;
+  margin: 0 auto;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notifications-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.mark-all-read {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .notification-card {
-  background: #f1f3ff;
-  padding: 1rem;
-  border-radius: 16px;
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  animation: slideIn 0.3s ease;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.notification-card:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .notification-card.unread {
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid var(--primary);
+  background: rgba(255, 107, 157, 0.05);
 }
 
-.notification-card img {
-  width: 50px;
-  height: 50px;
+.notification-avatar {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+.notification-content {
+  flex: 1;
+}
+
+.notification-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.notification-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.delete-notification {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.notification-card:hover .delete-notification {
+  opacity: 1;
+}
+
+.delete-notification:hover {
+  background: var(--bg-secondary);
+  color: var(--primary);
+}
+
+.empty-notifications {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .notifications-page {
+    padding: 16px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .notifications-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
   }
 }
