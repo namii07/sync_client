@@ -1,0 +1,1 @@
+export const API_BASE_URL = 'https://sync-server-n34n.onrender.com';

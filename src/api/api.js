@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { handleApiError } from '../utils/errorHandler';
+import { API_BASE_URL } from '../config/api.js';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = `${API_BASE_URL}/api`;
 
 const api = axios.create({
   baseURL: API_URL,
