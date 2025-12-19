@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, TrendingUp, Users, Hash, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { userService } from "../../services/userService";
+import { searchUsers, followUser } from "../../api/users";
 import TrendingSection from "../../components/TrendingSection/TrendingSection";
 import SuggestedUsersSection from "../../components/SuggestedUsersSection/SuggestedUsersSection";
 import toast from "react-hot-toast";
@@ -99,7 +99,7 @@ const Explore = () => {
 
     setLoading(true);
     try {
-      const data = await userService.searchUsers(query);
+      const data = await searchUsers(query);
       setSearchResults(data.users || []);
     } catch (error) {
       toast.error('Search failed');
@@ -111,7 +111,7 @@ const Explore = () => {
 
   const handleFollow = async (userId) => {
     try {
-      await userService.followUser(userId);
+      await followUser(userId);
       toast.success('Following user!');
       // Update the user's following status in the results
       setSearchResults(prev => prev.map(user => 

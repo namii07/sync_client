@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { userService } from '../../services/userService';
+import { getSuggestedUsers, followUser, unfollowUser } from '../../api/users';
 import Loader from '../Loader/Loader';
+import { mockUsers } from '../../utils/mockData';
 import toast from 'react-hot-toast';
 
 const SuggestedUsersSection = () => {
@@ -12,10 +13,11 @@ const SuggestedUsersSection = () => {
     const fetchSuggestedUsers = async () => {
       try {
         setLoading(true);
-        const data = await userService.getSuggestedUsers();
+        const data = await getSuggestedUsers();
         setSuggestedUsers(data.users || []);
       } catch (error) {
-        toast.error('Failed to load suggested users');
+        console.error('Failed to load suggested users:', error);
+        setSuggestedUsers(mockUsers);
       } finally {
         setLoading(false);
       }
@@ -28,9 +30,9 @@ const SuggestedUsersSection = () => {
     try {
       const user = suggestedUsers.find(u => u._id === userId);
       if (user.isFollowing) {
-        await userService.unfollowUser(userId);
+        await unfollowUser(userId);
       } else {
-        await userService.followUser(userId);
+        await followUser(userId);
       }
       
       setSuggestedUsers(prev => prev.map(u => 

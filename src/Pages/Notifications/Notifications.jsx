@@ -1,11 +1,7 @@
-import { useState, useEffect } from "react";
-import { useNotifications } from "../../context/NotificationContext";
-import { notificationService } from "../../services/notificationService";
-import { formatDistanceToNow } from "../../utils/formatDate";
-import { Heart, MessageCircle, UserPlus, X } from "lucide-react";
-import toast from "react-hot-toast";
-import Loader from "../../components/Loader/Loader";
-import "./notifications.css";
+import { useState, useEffect } from 'react';
+import { getNotifications, markNotificationAsRead, clearAllNotifications } from '../../api/notifications';
+import { Bell, Trash2 } from 'lucide-react';
+import './notifications.css';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -15,10 +11,10 @@ const Notifications = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const data = await notificationService.getNotifications();
+        const data = await getNotifications();
         setNotifications(data.notifications || []);
       } catch (error) {
-        toast.error('Failed to load notifications');
+        console.error('Failed to fetch notifications:', error);
       } finally {
         setLoading(false);
       }
@@ -27,96 +23,62 @@ const Notifications = () => {
     fetchNotifications();
   }, []);
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "like": return <Heart size={16} className="text-red-500" />;
-      case "comment": return <MessageCircle size={16} className="text-blue-500" />;
-      case "follow": return <UserPlus size={16} className="text-green-500" />;
-      default: return null;
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif._id === notificationId ? { ...notif, isRead: true } : notif
+        )
+      );
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
     }
   };
 
-  const handleNotificationClick = async (notification) => {
-    if (!notification.isRead) {
+  const handleClearAll = async () => {
+    if (window.confirm('Clear all notifications?')) {
       try {
-        await notificationService.markAsRead(notification._id);
-        setNotifications(prev => prev.map(n => 
-          n._id === notification._id ? { ...n, isRead: true } : n
-        ));
+        await clearAllNotifications();
+        setNotifications([]);
       } catch (error) {
-        toast.error('Failed to mark as read');
+        console.error('Failed to clear notifications:', error);
       }
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      await notificationService.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      toast.success('All notifications marked as read');
-    } catch (error) {
-      toast.error('Failed to mark all as read');
-    }
-  };
-
-  const handleDeleteNotification = async (id) => {
-    try {
-      await notificationService.deleteNotification(id);
-      setNotifications(prev => prev.filter(n => n._id !== id));
-      toast.success('Notification deleted');
-    } catch (error) {
-      toast.error('Failed to delete notification');
-    }
-  };
+  if (loading) return <div>Loading notifications...</div>;
 
   return (
     <div className="notifications-page">
       <div className="notifications-header">
-        <h2>Notifications</h2>
-        {notifications.some(n => !n.isRead) && (
-          <button onClick={handleMarkAllAsRead} className="mark-all-read">
-            Mark all as read
+        <h1><Bell size={24} /> Notifications</h1>
+        {notifications.length > 0 && (
+          <button onClick={handleClearAll} className="clear-all-btn">
+            <Trash2 size={16} /> Clear All
           </button>
         )}
       </div>
 
       <div className="notifications-list">
-        {loading ? (
-          <Loader />
-        ) : notifications.length === 0 ? (
-          <div className="empty-notifications">
+        {notifications.length === 0 ? (
+          <div className="no-notifications">
             <p>No notifications yet</p>
           </div>
         ) : (
-          notifications.map((notification) => (
-            <div
-              key={notification._id}
-              className={`notification-card ${!notification.isRead ? 'unread' : ''}`}
-              onClick={() => handleNotificationClick(notification)}
+          notifications.map(notification => (
+            <div 
+              key={notification._id} 
+              className={`notification-item ${notification.isRead ? 'read' : 'unread'}`}
+              onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
             >
-              <img src={notification.from?.avatar} alt={notification.from?.username} className="notification-avatar" />
-              
+              <img src={notification.from?.avatar} alt={notification.from?.username} />
               <div className="notification-content">
-                <div className="notification-text">
-                  {getIcon(notification.type)}
-                  <span>
-                    <strong>@{notification.from?.username}</strong> {notification.message}
-                  </span>
-                </div>
+                <p>{notification.message}</p>
                 <span className="notification-time">
-                  {formatDistanceToNow(notification.createdAt)}
+                  {new Date(notification.createdAt).toLocaleDateString()}
                 </span>
               </div>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteNotification(notification._id);
-                }}
-                className="delete-notification"
-              >
-                <X size={16} />
-              </button>
             </div>
           ))
         )}

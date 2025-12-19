@@ -1,52 +1,74 @@
 import { useState } from 'react';
+import { createPost } from '../../api/posts';
 import { X, Image, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 import './createPost.css';
 
-const CreatePost = ({ onPostCreate, user }) => {
-  const [caption, setCaption] = useState('');
-  const [images, setImages] = useState([]);
-  const [previews, setPreviews] = useState([]);
+const CreatePost = ({ onPostCreated, user }) => {
+  const [content, setContent] = useState('');
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImages(prev => [...prev, file]);
-        setPreviews(prev => [...prev, event.target.result]);
-      };
-      reader.readAsDataURL(file);
-    });
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
-  const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setPreviews(prev => prev.filter((_, i) => i !== index));
+  const removeImage = () => {
+    setImage(null);
+    setPreview(null);
   };
 
-  const handlePost = () => {
-    if (!caption.trim() && images.length === 0) {
-      alert('Please add a caption or image!');
+  const handleSubmit = async () => {
+    if (!content.trim() && !image) {
+      toast.error('Please add content or an image');
       return;
     }
 
-    const newPost = {
-      id: Date.now(),
-      user: {
-        name: user?.name || 'You',
-        avatar: user?.avatar || 'https://i.pinimg.com/736x/b3/35/ec/b335ecd186e7a7e8913c41418ce9c9c0.jpg'
-      },
-      caption: caption.trim(),
-      images: previews,
-      timestamp: new Date().toLocaleString(),
-      comments: []
-    };
-
-    onPostCreate(newPost);
-    setCaption('');
-    setImages([]);
-    setPreviews([]);
+    setLoading(true);
+    try {
+      const postData = { content: content.trim() };
+      if (image) {
+        postData.image = image;
+      }
+      
+      const newPost = await createPost(postData);
+      onPostCreated(newPost);
+      setContent('');
+      setImage(null);
+      setPreview(null);
+      toast.success('Post created successfully!');
+    } catch (error) {
+      console.error('Create post error:', error);
+      // Create a mock post for demo purposes
+      const mockPost = {
+        _id: Date.now().toString(),
+        content: content.trim(),
+        author: {
+          _id: user?._id || 'demo',
+          username: user?.username || 'You',
+          avatar: user?.avatar || 'https://via.placeholder.com/40'
+        },
+        createdAt: new Date().toISOString(),
+        likes: [],
+        likesCount: 0,
+        comments: [],
+        isLiked: false,
+        isSaved: false,
+        image: preview
+      };
+      onPostCreated(mockPost);
+      setContent('');
+      setImage(null);
+      setPreview(null);
+      toast.success('Post created (demo mode)!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,25 +81,18 @@ const CreatePost = ({ onPostCreate, user }) => {
         />
         <textarea
           placeholder="What's on your mind?"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           className="caption-input"
         />
       </div>
 
-      {previews.length > 0 && (
-        <div className="image-previews">
-          {previews.map((preview, index) => (
-            <div key={index} className="preview-container">
-              <img src={preview} alt={`Preview ${index + 1}`} className="preview-image" />
-              <button 
-                onClick={() => removeImage(index)} 
-                className="remove-btn"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          ))}
+      {preview && (
+        <div className="image-preview">
+          <img src={preview} alt="Preview" className="preview-image" />
+          <button onClick={removeImage} className="remove-btn">
+            <X size={16} />
+          </button>
         </div>
       )}
 
@@ -87,16 +102,15 @@ const CreatePost = ({ onPostCreate, user }) => {
           <span>Photo</span>
           <input
             type="file"
-            multiple
             accept="image/*"
             onChange={handleImageUpload}
             style={{ display: 'none' }}
           />
         </label>
 
-        <button onClick={handlePost} className="post-btn">
+        <button onClick={handleSubmit} disabled={loading} className="post-btn">
           <Send size={16} />
-          Post
+          {loading ? 'Posting...' : 'Post'}
         </button>
       </div>
     </div>

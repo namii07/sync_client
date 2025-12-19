@@ -1,110 +1,48 @@
-import { useState, useEffect, useRef } from "react";
-import { Send, Search, MoreVertical, Phone, Video, Smile } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
-import { messageService } from "../../services/messageService";
-import { formatDistanceToNow } from "../../utils/formatDate";
-import toast from "react-hot-toast";
-import Loader from "../../components/Loader/Loader";
-import "./chat.css";
+import { useState } from 'react';
+import { Send, Search } from 'lucide-react';
+import './chat.css';
 
 const Chat = () => {
-  const { user } = useAuth();
   const [selectedChat, setSelectedChat] = useState(null);
   const [message, setMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const messagesEndRef = useRef(null);
 
-  const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const conversations = [
+    {
+      id: 1,
+      user: { name: 'Alice', avatar: 'https://i.pinimg.com/736x/b3/35/ec/b335ecd186e7a7e8913c41418ce9c9c0.jpg' },
+      lastMessage: 'Hey! How are you?',
+      time: '2m ago',
+      unread: 2
+    },
+    {
+      id: 2,
+      user: { name: 'John', avatar: 'https://i.pinimg.com/736x/78/49/25/784925b2707ac85810965a0fcb0da88a.jpg' },
+      lastMessage: 'Thanks for the help!',
+      time: '1h ago',
+      unread: 0
+    },
+    {
+      id: 3,
+      user: { name: 'Sarah', avatar: 'https://i.pinimg.com/736x/51/da/e4/51dae45486f8cdf2a37067a5439bdc7f.jpg' },
+      lastMessage: 'See you tomorrow',
+      time: '3h ago',
+      unread: 1
+    }
+  ];
 
-  const [messages, setMessages] = useState([]);
-  const [messagesLoading, setMessagesLoading] = useState(false);
+  const messages = selectedChat ? [
+    { id: 1, text: 'Hey! How are you?', sender: 'other', time: '2:30 PM' },
+    { id: 2, text: 'I\'m good, thanks! How about you?', sender: 'me', time: '2:32 PM' },
+    { id: 3, text: 'Doing great! Working on some new projects', sender: 'other', time: '2:35 PM' }
+  ] : [];
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        setLoading(true);
-        const data = await messageService.getConversations();
-        setConversations(data.conversations || []);
-      } catch (error) {
-        toast.error('Failed to load conversations');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchConversations();
-  }, []);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!selectedChat) return;
-      
-      try {
-        setMessagesLoading(true);
-        const data = await messageService.getMessages(selectedChat._id);
-        setMessages(data.messages || []);
-      } catch (error) {
-        toast.error('Failed to load messages');
-      } finally {
-        setMessagesLoading(false);
-      }
-    };
-
-    fetchMessages();
-  }, [selectedChat]);
-
-  const filteredConversations = conversations.filter(conv =>
-    conv.otherUser?.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!message.trim() || !selectedChat) return;
-
-    try {
-      const newMessage = await messageService.sendMessage(selectedChat.otherUser._id, {
-        content: message.trim()
-      });
-
-      setMessages(prev => [...prev, newMessage]);
-      
-      setConversations(prev => prev.map(conv => 
-        conv._id === selectedChat._id 
-          ? {
-              ...conv,
-              lastMessage: newMessage,
-              updatedAt: new Date()
-            }
-          : conv
-      ));
-
-      setMessage('');
-    } catch (error) {
-      toast.error('Failed to send message');
-    }
+    if (!message.trim()) return;
+    
+    // Add message logic here
+    setMessage('');
   };
-
-  const markAsRead = async (chatId) => {
-    try {
-      await messageService.markAsRead(chatId);
-      setConversations(prev => prev.map(conv =>
-        conv._id === chatId ? { ...conv, unreadCount: 0 } : conv
-      ));
-    } catch (error) {
-      console.error('Failed to mark as read:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedChat) {
-      markAsRead(selectedChat._id);
-    }
-  }, [selectedChat]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, selectedChat]);
 
   return (
     <div className="chat-container">
@@ -118,45 +56,34 @@ const Chat = () => {
           <input
             type="text"
             placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
         </div>
 
         <div className="conversations-list">
-          {loading ? (
-            <Loader />
-          ) : (
-            filteredConversations.map(conversation => (
-              <div
-                key={conversation._id}
-                className={`conversation-item ${selectedChat?._id === conversation._id ? 'active' : ''}`}
-                onClick={() => setSelectedChat(conversation)}
-              >
-                <div className="conversation-avatar">
-                  <img src={conversation.otherUser?.avatar} alt={conversation.otherUser?.username} />
-                </div>
-                
-                <div className="conversation-info">
-                  <div className="conversation-header">
-                    <h4>@{conversation.otherUser?.username}</h4>
-                    <span className="timestamp">
-                      {formatDistanceToNow(conversation.lastMessage?.createdAt)}
-                    </span>
-                  </div>
-                  <p className="last-message">
-                    {conversation.lastMessage?.sender === user._id && 'You: '}
-                    {conversation.lastMessage?.content}
-                  </p>
-                </div>
-                
-                {conversation.unreadCount > 0 && (
-                  <div className="unread-badge">{conversation.unreadCount}</div>
-                )}
+          {conversations.map(conversation => (
+            <div
+              key={conversation.id}
+              className={`conversation-item ${selectedChat?.id === conversation.id ? 'active' : ''}`}
+              onClick={() => setSelectedChat(conversation)}
+            >
+              <div className="conversation-avatar">
+                <img src={conversation.user.avatar} alt={conversation.user.name} />
               </div>
-            ))
-          )}
+              
+              <div className="conversation-info">
+                <div className="conversation-header">
+                  <h4>{conversation.user.name}</h4>
+                  <span className="timestamp">{conversation.time}</span>
+                </div>
+                <p className="last-message">{conversation.lastMessage}</p>
+              </div>
+              
+              {conversation.unread > 0 && (
+                <div className="unread-badge">{conversation.unread}</div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -165,50 +92,28 @@ const Chat = () => {
           <>
             <div className="chat-header">
               <div className="chat-user-info">
-                <img src={selectedChat.otherUser?.avatar} alt={selectedChat.otherUser?.username} />
+                <img src={selectedChat.user.avatar} alt={selectedChat.user.name} />
                 <div>
-                  <h3>@{selectedChat.otherUser?.username}</h3>
-                  <span className="status offline">Offline</span>
+                  <h3>{selectedChat.user.name}</h3>
+                  <span className="status online">Online</span>
                 </div>
-              </div>
-              
-              <div className="chat-actions">
-                <button className="action-btn">
-                  <Phone size={20} />
-                </button>
-                <button className="action-btn">
-                  <Video size={20} />
-                </button>
-                <button className="action-btn">
-                  <MoreVertical size={20} />
-                </button>
               </div>
             </div>
 
             <div className="messages-container">
-              {messagesLoading ? (
-                <Loader />
-              ) : (
-                messages.map(msg => (
-                  <div
-                    key={msg._id}
-                    className={`message ${msg.sender === user._id ? 'sent' : 'received'}`}
-                  >
-                    {msg.sender !== user._id && (
-                      <img src={selectedChat.otherUser?.avatar} alt={selectedChat.otherUser?.username} className="message-avatar" />
-                    )}
-                    <div className="message-content">
-                      <div className="message-bubble">
-                        <p>{msg.content}</p>
-                      </div>
-                      <span className="message-time">
-                        {formatDistanceToNow(msg.createdAt)}
-                      </span>
+              {messages.map(msg => (
+                <div
+                  key={msg.id}
+                  className={`message ${msg.sender === 'me' ? 'sent' : 'received'}`}
+                >
+                  <div className="message-content">
+                    <div className="message-bubble">
+                      <p>{msg.text}</p>
                     </div>
+                    <span className="message-time">{msg.time}</span>
                   </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
+                </div>
+              ))}
             </div>
 
             <form onSubmit={handleSendMessage} className="message-input-container">
@@ -220,9 +125,6 @@ const Chat = () => {
                   onChange={(e) => setMessage(e.target.value)}
                   className="message-input"
                 />
-                <button type="button" className="emoji-btn">
-                  <Smile size={20} />
-                </button>
               </div>
               <button type="submit" className="send-btn" disabled={!message.trim()}>
                 <Send size={20} />

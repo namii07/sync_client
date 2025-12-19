@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { userService } from "../../services/userService";
-import { postService } from "../../services/postService";
+import { getUserProfile, followUser, unfollowUser } from "../../api/users";
+import { getUserPosts } from "../../api/posts";
 import { Calendar, MapPin, Link as LinkIcon, Edit3, UserPlus, UserMinus } from "lucide-react";
 import PostCard from "../../components/PostCard/PostCard";
 import Loader from "../../components/Loader/Loader";
@@ -29,11 +29,9 @@ const Profile = () => {
         let profileData;
         
         if (isOwnProfile) {
-          // Get current user data from API
-          const response = await userService.getCurrentUser();
-          profileData = response.user;
+          profileData = currentUser;
         } else {
-          const response = await userService.getProfile(username);
+          const response = await getUserProfile(username);
           profileData = response.user;
           setUser(profileData);
           setIsFollowing(response.isFollowing);
@@ -41,7 +39,7 @@ const Profile = () => {
         
         // Fetch user posts
         if (profileData?._id) {
-          const postsResponse = await postService.getUserPosts(profileData._id);
+          const postsResponse = await getUserPosts(profileData._id);
           setPosts(postsResponse.posts || []);
         }
         
@@ -61,12 +59,12 @@ const Profile = () => {
   const handleFollow = async () => {
     try {
       if (isFollowing) {
-        await userService.unfollowUser(user._id);
+        await unfollowUser(user._id);
         setIsFollowing(false);
         setUser(prev => ({ ...prev, followersCount: prev.followersCount - 1 }));
         toast.success('Unfollowed');
       } else {
-        await userService.followUser(user._id);
+        await followUser(user._id);
         setIsFollowing(true);
         setUser(prev => ({ ...prev, followersCount: prev.followersCount + 1 }));
         toast.success('Following');
@@ -83,11 +81,7 @@ const Profile = () => {
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-cover">
-          <img 
-            src="https://i.pinimg.com/1200x/9e/41/65/9e4165236df736c00b13f2bbb330de6f.jpg" 
-            alt="Cover" 
-            className="cover-image"
-          />
+          <div className="cover-image"></div>
         </div>
         
         <div className="profile-info">
